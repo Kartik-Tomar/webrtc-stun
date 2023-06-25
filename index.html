@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Web RTC</title>
+</head>
+<style>
+    body {
+        margin: 0px;
+    }
+
+    .container {
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        font: caption;
+    }
+
+    .rtc-container {
+        width: 80%;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .instruction-container {
+        border: 2px solid;
+        padding: 0px 10px 0px 10px;
+        border-radius: 10px;
+        margin: 10px 0px 10px 0px;
+    }
+
+    .instruction-heading {
+        margin: 10px 0px 0px 0px;
+    }
+
+    ol {
+        margin-top: 5px;
+    }
+
+    .set-area {
+        border: 2px solid;
+        padding: 10px 20px 10px 10px;
+        border-radius: 10px;
+        margin: 10px 0px 50px 0px;
+    }
+
+    .offer-area {
+        border: 2px solid;
+        padding: 10px 20px 10px 10px;
+        border-radius: 10px;
+        margin: 30px 0px 10px 0px;
+    }
+
+    .text-area {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        height: 50px;
+    }
+
+    .btn {
+        border: none;
+        height: 28px;
+        width: 120px;
+        background-color: #787878;
+        color: white;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-span {
+        border: none;
+        background-color: #787878;
+        color: white;
+        border-radius: 6px;
+        padding: 2px 10px 2px 10px;
+    }
+
+    #offer {
+        width: 100%;
+        height: 72px;
+        overflow: scroll;
+        border: 1px solid;
+        padding: 5px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        display: none;
+    }
+
+    .chat-button {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        cursor: pointer;
+        border: none;
+        color: white;
+        background: #787878;
+        width: 60px;
+        height: 30px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+
+    .chat-container {
+        padding: 10px;
+        border: 1px solid;
+        position: fixed;
+        bottom: 50px;
+        right: 10px;
+        height: 85vh;
+        background: white;
+    }
+
+    .chat-text-box {
+        height: calc(85vh - 75px);
+        padding-bottom: 10px;
+        overflow-y: auto;
+    }
+
+    .chat-text {
+        width: 275px;
+        margin-left: 0px;
+        margin-right: 40px;
+        border: 1px solid;
+        border-radius: 5px;
+        padding: 5px 5px 5px 5px;
+        background: #cc0100;
+        color: white;
+        overflow-wrap: anywhere;
+    }
+
+    .my-text {
+        margin-left: 40px;
+        margin-right: 0px;
+        border: 1px solid;
+        border-radius: 5px;
+        padding: 5px 5px 5px 5px;
+        background: #2d7d46;
+    }
+
+    .toast {
+        visibility: hidden;
+        text-align: center;
+        border-radius: 2px;
+        background: #555555;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        border-radius: 12px;
+        position: fixed;
+        right: 5px;
+        top: 5px;
+        letter-spacing: 1.5px;
+    }
+
+    .toast--show {
+        visibility: visible;
+    }
+
+    .btn-x {
+        width: 75px;
+        margin-bottom: 10px;
+    }
+
+    #message-input {
+        width: 240px;
+        height: 25px;
+        font-size: 18px;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="rtc-container">
+            <h1>Web RTC Connection</h1>
+            <div class="instruction-container">
+                <h2 class="instruction-heading">Instructions</h2>
+                <p>
+                    Follow any one of the instruction and peer has to follow the other
+                    one
+                </p>
+                <h4 class="instruction-heading">Create Offer & Accept Answer</h4>
+                <ol>
+                    <li>Click on <span class="btn-span">Create Offer</span></li>
+                    <li>
+                        Copy Session Description Protocol (SDP) message that will appear
+                    </li>
+                    <li>Send the message to the peer and ask for answer</li>
+                    <li>
+                        After receiving answer message past it in text area and click
+                        <span class="btn-span">Set Answer</span> button
+                    </li>
+                    <li>You will see a message of connection open</li>
+                </ol>
+                <h4 class="instruction-heading">Accept Offer & Create Answer</h4>
+                <ol>
+                    <li>
+                        You will get an offer message, copy it and past inside text area
+                        and click on <span class="btn-span">Set Offer</span> button
+                    </li>
+                    <li>
+                        Then click on <span class="btn-span">Create Answer</span> button
+                    </li>
+                    <li>
+                        Copy Session Description Protocol (SDP) message that will appear
+                    </li>
+                    <li>Send the answer message to the peer</li>
+                    <li>If peer accept the answer and you will see connection open</li>
+                </ol>
+            </div>
+            <div class="offer-area">
+                <button onclick="createOffer()" class="btn">Create Offer</button>
+                <span>OR</span>
+                <button onclick="createAnswer()" class="btn">Create Answer</button>
+                <div id="offer"></div>
+                <button onclick="copySDP()" class="btn" id="copy-sdp" style="display: none;">Copy SDP</button>
+            </div>
+            <div class="set-area">
+                <textarea placeholder="Set offer / answer here" id="offer-answer-input" class="text-area"></textarea>
+                <button onclick="setOffer()" class="btn">Set Offer</button>
+                <span>OR</span>
+                <button onclick="setAnswer()" class="btn">Set Answer</button>
+            </div>
+        </div>
+        <div class="chat-container" style="display: none;">
+            <button class="btn btn-x" onclick="chatButtonToggle()">X</button>
+            <div class="chat-text-box" id="chat-text-box">
+                <!-- sample chat -->
+                <!-- <p class="chat-text my-text">Hi</p>
+                <p class="chat-text">Hello</p>
+                <p class="chat-text">How are you?</p>
+                <p class="chat-text my-text">I am good</p>
+                <p class="chat-text my-text">How are you?</p>
+                <p class="chat-text">I am good as well</p>
+                <p class="chat-text">What are you upto What are you upto What are you upto</p>
+                <p class="chat-text my-text">Nothing</p>
+                <p class="chat-text my-text">What are you upto What are you upto What are you upto</p> -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" />
+                <button onclick="sendMessage()" class="btn btn-x">Send</button>
+            </div>
+        </div>
+        <button class="chat-button" onclick="chatButtonToggle()">Chat</button>
+        <div class="toast"></div>
+    </div>
+    <script>
+
+        const chatButtonToggle = () => {
+            const chatButton = document.getElementsByClassName("chat-container");
+            if (chatButton[0].style.display === "block")
+                chatButton[0].style.display = "none";
+            else chatButton[0].style.display = "block";
+        };
+
+        const toastMessage = (text, color) => {
+            const message = document.querySelector(".toast");
+            message.classList.add("toast--show");
+            message.innerText = text;
+            if (color) message.style.background = color;
+            setTimeout(() => {
+                message.classList.remove("toast--show");
+            }, 4000);
+        }
+
+        const copySDP = () => {
+            let copyText = document.getElementById("offer");
+            navigator.clipboard.writeText(copyText.innerText)
+                .then(() => {
+                    toastMessage("successfully copied", "#2d7d46");
+                })
+                .catch(() => {
+                    toastMessage("something went wrong", "#cc0100");
+                });
+        };
+        document.getElementById('message-input').onkeypress = function (e) {
+            if (!e) e = window.event;
+            var keyCode = e.code || e.key;
+            if (keyCode == 'Enter') {
+                sendMessage()
+            }
+        }
+
+        const servers = {
+            iceServers: [
+                {
+                    urls: "stun:stun.l.google.com:19302",
+                    urls: "stun:stun1.l.google.com:19302",
+                    urls: "stun:stun2.l.google.com:19302",
+                    urls: "stun:stun3.l.google.com:19302",
+                    urls: "stun:stun4.l.google.com:19302",
+                },
+            ],
+            iceCandidatePoolSize: 10,
+        };
+
+        const localConnection = new RTCPeerConnection(servers);
+        localConnection.onicecandidate = (event) => {
+            const offer = document.getElementById("offer")
+            offer.innerHTML = JSON.stringify(localConnection.localDescription)
+            offer.style.display = 'block'
+            document.getElementById("copy-sdp").style.display = 'block'
+        };
+
+        let dataChannel = null;
+
+        localConnection
+            .createOffer()
+            .then((offer) => localConnection.setLocalDescription(offer))
+            .then((event) => dataChannel = localConnection.createDataChannel("channel"));
+
+        const createOffer = () => {
+            localConnection
+                .createOffer()
+                .then((offer) => localConnection.setLocalDescription(offer))
+                .then((event) => {
+                    toastMessage("Local Description set successfully", "#2d7d46")
+                    dataChannel = localConnection.createDataChannel("channel");
+                    dataChannel.onopen = (event) => toastMessage("Connection Opened !!!", "#2d7d46");
+                    dataChannel.onclose = (event) => toastMessage("Connection Closed !!!", "#cc0100");
+                    dataChannel.onmessage = (event) => {
+                        console.log("Message for out", event.data);
+                        const para = document.createElement("p");
+                        const node = document.createTextNode(event.data);
+                        para.className = "chat-text";
+                        para.appendChild(node);
+                        document.getElementById("chat-text-box").appendChild(para);
+                    };
+                });
+        };
+        const setOffer = () => {
+            const offer = JSON.parse(
+                document.getElementById("offer-answer-input").value
+            );
+            localConnection.setRemoteDescription(offer).then((a) => {
+                toastMessage("set offer done", "#2d7d46");
+                localConnection.ondatachannel = (e) => {
+                    dataChannel = e.channel;
+                    dataChannel.onmessage = (e) => {
+                        console.log("messsage received!!!" + e.data);
+                        const para = document.createElement("p");
+                        const node = document.createTextNode(e.data);
+                        para.className = "chat-text";
+                        para.appendChild(node);
+                        document.getElementById("chat-text-box").appendChild(para);
+                    };
+                    dataChannel.onopen = (e) => toastMessage("Connection Opened !!!", "#2d7d46");
+                    dataChannel.onclose = (e) => toastMessage("Connection Closed !!!", "#cc0100");
+                    localConnection.channel = dataChannel;
+                };
+            });
+        };
+        const createAnswer = () => {
+            localConnection
+                .createAnswer()
+                .then((offer) => localConnection.setLocalDescription(offer))
+                .then((event) => toastMessage("Local Description set successfully"));
+        };
+        const setAnswer = () => {
+            const answer = JSON.parse(
+                document.getElementById("offer-answer-input").value
+            );
+            localConnection
+                .setRemoteDescription(answer)
+                .then((a) => toastMessage("set answer done", "#2d7d46"));
+        };
+        const sendMessage = () => {
+            let messageInput = document.getElementById("message-input")
+            const message = messageInput.value;
+            messageInput.value = "";
+            const para = document.createElement("p");
+            const node = document.createTextNode(message);
+            para.className = "chat-text my-text";
+            para.appendChild(node);
+            document.getElementById("chat-text-box").appendChild(para);
+            dataChannel.send(message);
+        };
+    </script>
+</body>
+
+</html>
